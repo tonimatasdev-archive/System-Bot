@@ -1,8 +1,11 @@
 package dev.tonimatas.systembot;
 
+import dev.tonimatas.systembot.events.SlashCommands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,9 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 public class SystemBot {
     public static JDA jda;
@@ -60,7 +61,9 @@ public class SystemBot {
 
         JDABuilder builder = JDABuilder.createDefault(token);
         
+        builder.addEventListeners(new SlashCommands());
         builder.enableIntents(List.of(GatewayIntent.values()));
+        
 
         try {
             jda = builder.build().awaitReady();
@@ -68,5 +71,9 @@ public class SystemBot {
             logger.error("Error starting the bot.");
             throw new RuntimeException(e);
         }
+
+        CommandListUpdateAction commands = jda.updateCommands();
+        commands = commands.addCommands(Commands.slash("ping", "See the ping to the bot."));
+        commands.queue();
     }
 }
